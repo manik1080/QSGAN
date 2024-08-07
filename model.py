@@ -6,6 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import pennylane as qml
+from torchsummary import summary
 
 
 class PatchQuantumGenerator(nn.Module):
@@ -118,3 +119,16 @@ class DiscriminatorUnsupervised(nn.Module):
         x = self.discriminator(x)
         x = self.custom_activation(x)
         return x
+
+
+if __name__=='__main__':
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    discriminator_base = Discriminator()
+    discriminator_unsup = DiscriminatorUnsupervised(discriminator_base).to(device)
+    discriminator_sup = DiscriminatorSupervised(discriminator_base).to(device)
+    generator = PatchQuantumGenerator(n_generators, device).to(device)
+    print("Input shape: (1, 8, 8)")
+    print("Base Discriminator:", summary(discriminator, (1, 8, 8)), sep='\n')
+    print("Supervised Discriminator", summary(disc_sup, (1, 8, 8)), sep='\n')
+    print("Unsupervised Discriminator", summary(disc_unsup, (1, 8, 8)), sep='\n')
+    print("Generator", summary(generator, (1, 8, 8)), sep='\n')
