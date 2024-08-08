@@ -51,16 +51,23 @@ class DatasetLoader(Dataset):
 
 
 class FinancialFraudDataset:
-    def __init__(self, data, labels, image_size, n_components, batch_size=1):
+    def __init__(self, data, image_size, batch_size=1):
+        """
+        Args:
+            data (pandas.DataFrame): DataFrame containing lab
+            labels (pandas.DataFrame): DataFrame containing the labels and values.
+            label (int): Label to filter by.
+            transform (callable, optional): Optional transform to be applied
+                on a sample
+        """
         self.image_size = image_size
         self.batch_size = batch_size
         self.data = data
         self.tsne_data = None
         self.le = LabelEncoder()
-        self.labels = np.array(self.le.fit_transform(labels))
+        self.labels = np.array(self.le.fit_transform(data['Fraud']))
         self.ohe = OneHotEncoder()
         self.labels_categorical = ohe.fit_transform(self.labels.reshape(-1, 1)).toarray()
-        self.n_components = n_components
 
     def preprocess(self, n_components):
         corpus = np.array(self.data)
@@ -72,8 +79,9 @@ class FinancialFraudDataset:
         tsne = TSNE(n_components=self.n_components, method='exact', random_state=42)
         self.tsne_data = tsne.fit_transform(tfidf_matrix)
 
-    def create_train_test_loaders(self):
+    def create_train_test_loaders(self, n_components=64):
         transform = transforms.Compose([transforms.ToTensor()])
+        self.preprocess(n_components)
         
         data = pd.DataFrame({'Filings': self.tsne_data.tolist(), 'Fraud': self.labels, 'Categorical': self.labels_categorical.tolist()})
         x_train, x_test, y_train, y_test = train_test_split(self.data['Filings'], self.data[['Fraud', 'Categorical']], test_size=0.2, random_state=42)
