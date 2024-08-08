@@ -89,3 +89,7 @@ class FinancialFraudDataset:
         )
 
         return train_loader, test_loader
+
+
+if __name__ == '__main__':
+    pass
