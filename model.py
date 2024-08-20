@@ -15,7 +15,7 @@ class PatchQuantumGenerator(nn.Module):
             n_qubits (int): Total number of qubits / N
             n_a_qubits (int): Number of ancillary qubits / N_A
             q_depth (int): Depth of the parameterised quantum circuit / D
-            device (string): Device; gpu, if available, else cpu.
+            device (string): Device; quantum device
             q_delta (float, optional): Spread of the random distribution for parameter initialisation.
         """
 
@@ -29,8 +29,9 @@ class PatchQuantumGenerator(nn.Module):
         )
         self.n_generators = n_generators
         self.device = device
+        self.dev = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
-    @qml.qnode(dev, diff_method="parameter-shift")
+    @qml.qnode(self.device, diff_method="parameter-shift")
     def quantum_circuit(self, noise, weights):
         weights = weights.reshape(q_depth, n_qubits)
         for i in range(n_qubits):
@@ -55,9 +56,9 @@ class PatchQuantumGenerator(nn.Module):
 
     def forward(self, x):
         patch_size = 2 ** (n_qubits - n_a_qubits)
-        images = torch.Tensor(x.size(0), 0).to(self.device)
+        images = torch.Tensor(x.size(0), 0).to(self.dev)
         for params in self.q_params:
-            patches = torch.Tensor(0, patch_size).to(self.device)
+            patches = torch.Tensor(0, patch_size).to(self.dev)
             for elem in x:
                 q_out = self.partial_measure(elem, params).float().unsqueeze(0)
                 patches = torch.cat((patches, q_out))
