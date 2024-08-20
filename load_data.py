@@ -51,16 +51,11 @@ class DatasetLoader(Dataset):
 
 
 class FinancialFraudDataset:
-    def __init__(self, data, image_size, batch_size=1):
+    def __init__(self, data, batch_size=1):
         """
         Args:
-            data (pandas.DataFrame): DataFrame containing lab
-            labels (pandas.DataFrame): DataFrame containing the labels and values.
-            label (int): Label to filter by.
-            transform (callable, optional): Optional transform to be applied
-                on a sample
+            data (pandas.DataFrame): DataFrame containing Financial Fraud Dataset.
         """
-        self.image_size = image_size
         self.batch_size = batch_size
         self.data = data
         self.tsne_data = None
@@ -75,8 +70,7 @@ class FinancialFraudDataset:
         tfidf_matrix = tfidf_vectorizer.fit_transform(corpus).toarray()
         print("Created TF-IDF matrix of shape: ", tfidf_matrix.shape)
 
-        n_components = 64
-        tsne = TSNE(n_components=self.n_components, method='exact', random_state=42)
+        tsne = TSNE(n_components=n_components, method='exact', random_state=42)
         self.tsne_data = tsne.fit_transform(tfidf_matrix)
 
     def create_train_test_loaders(self, n_components=64):
