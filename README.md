@@ -1,2 +1,2 @@
 # QSGAN
-Enhanced Data Augmentation with Patch-Based Quantum Semi-Supervised Generative Network (QSGAN)
+Patch-Based Hybrid Quantum Semi-Supervised Generative Network (QSGAN)
