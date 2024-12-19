@@ -93,5 +93,50 @@ class FinancialFraudDataset:
         return train_loader, test_loader
 
 
+class CIFAR_10_Dataset:
+    def __init__(self, batch_size=32):
+        """
+        CIFAR-10 Dataset functions.
+
+        Args:
+            batch_size (int): Number of samples per batch.
+        """
+        self.batch_size = batch_size
+        self.pca_data = None    ### do i need pca?
+        self.transform = transforms.Compose([
+            transforms.ToTensor(),
+            transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        ])
+
+        self.dataset = torchvision.datasets.CIFAR10(
+            root="./data", train=True, download=True, transform=self.transform
+        )
+        self.test_dataset = torchvision.datasets.CIFAR10(
+            root="./data", train=False, download=True, transform=self.transform
+        )
+
+    def create_train_test_loaders(self, split_ratio=0.8):
+        """
+        Splits the dataset into training and validation sets and returns data loaders.
+
+        Args:
+            split_ratio (float): Ratio of training to total dataset size (default 0.8).
+        """
+        train_size = int(split_ratio * len(self.dataset))
+        val_size = len(self.dataset) - train_size
+
+        train_dataset, val_dataset = random_split(self.dataset, [train_size, val_size])
+        train_loader = DataLoader(
+            train_dataset, batch_size=self.batch_size, shuffle=True, drop_last=True
+        )
+        val_loader = DataLoader(
+            val_dataset, batch_size=self.batch_size, shuffle=False, drop_last=True
+        )
+        test_loader = DataLoader(
+            self.test_dataset, batch_size=self.batch_size, shuffle=False, drop_last=True
+        )
+        return train_loader, val_loader, test_loader
+
+
 if __name__ == '__main__':
     pass
